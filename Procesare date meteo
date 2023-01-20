@@ -1,0 +1,459 @@
+setwd("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\R")
+library(dplyr)
+library(readr)
+install.packages("rlist")
+library(rlist)
+install.packages("filesstrings")
+install.packages("VFS")
+library(filesstrings)
+library(VFS)
+library(weathermetrics)
+require(rnoaa)
+require(lubridate)
+require(dplyr)
+library(arsenal)
+install.packages("GSODR")
+library(GSODR)
+install.packages("remotes")
+remotes::install_github("Carm1r/fruclimadapt")
+#data <- ("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\3083046.csv")
+#class(data)
+#dim(data)
+#str(data)
+#colnames(data)
+#rownames(data)
+#length(data)
+#memory.limit()
+#Import date in df - GSOD
+
+stations <- nearest_stations(LAT = 45.443175, LON = 25.445435, distance = 160) #statiile pe o raza de 160 km de vf omu
+print(stations)
+str(stations)
+# (Omu_GSOD <- get_GSOD(years= 2000,
+#                 station = '152800-99999',
+#                 country = NULL,
+#                 max_missing = NULL,
+#                 agroclimatology = FALSE
+#))
+c <- list("152590-99999", "152820-99999", "152990-99999", "152120-99999", "152980-99999", "152410-99999", 
+"154240-99999", "151455-99999", "153550-99999", "154290-99999", "153210-99999")
+stations_2 <- stations[!stations %in% c ] #eliminat statiile care nu au date in perioada de interes
+print(stations_2)
+#luat date statii separat (functia nu permite dwnld pe ani multipli)
+test_2021 <- (get_GSOD(years=2021,station = stations_2,country = NULL,max_missing = NULL,agroclimatology = FALSE)) 
+write.csv(test_2021, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2021.csv", row.names = FALSE)
+test_2020 <- (get_GSOD(years= 2020,station = stations_2,country = NULL,max_missing = NULL,agroclimatology = FALSE))
+write.csv(test_2020, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2020.csv", row.names = FALSE)
+test_2019 <- (get_GSOD(years=2019,station = stations_2,country = NULL,max_missing = NULL,agroclimatology = FALSE))
+write.csv(test_2019, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2019.csv", row.names = FALSE)
+test_2018 <- (get_GSOD(years=2018,station = stations_2,country = NULL,max_missing = NULL,agroclimatology = FALSE))
+write.csv(test_2018, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2018.csv", row.names = FALSE)
+test_2017 <- (get_GSOD(years=2017,station = stations_2,country = NULL,max_missing = NULL, agroclimatology = FALSE))
+write.csv(test_2017, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2017.csv", row.names = FALSE)
+test_2016 <- (get_GSOD(years=2016,station = stations_2,country = NULL,max_missing = NULL,agroclimatology = FALSE))
+write.csv(test_2016, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2016.csv", row.names = FALSE)
+test_2015 <- (get_GSOD(years=2015,station = stations_2,country = NULL,max_missing = NULL,agroclimatology = FALSE))
+write.csv(test_2015, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2015.csv", row.names = FALSE)
+##
+test_2014 <- (get_GSOD(years=2014,station = stations_2,country = NULL, max_missing = NULL,agroclimatology = FALSE))
+write.csv(test_2014, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2014.csv", row.names = FALSE)
+
+test_2013 <- (get_GSOD(years=2013,station = stations_2,country = NULL,max_missing = NULL,agroclimatology = FALSE))
+write.csv(test_2013, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2013.csv", row.names = FALSE)
+
+test_2012 <- (get_GSOD(years=2012,station = stations_2,country = NULL,max_missing = NULL,agroclimatology = FALSE))
+write.csv(test_2012, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2012.csv", row.names = FALSE)
+
+#ca să rămână scrise în morții lor
+#write.csv(test_2021, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2021.csv", row.names = FALSE)
+
+#recompunem seturi de date din csv ca să nu le mai pierd, în morții lor
+raw_2021 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2021.csv")
+raw_2020 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2020.csv")
+raw_2019 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2019.csv")
+raw_2018 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2018.csv")
+raw_2017 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2017.csv")
+raw_2016 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2016.csv")
+raw_2015 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2015.csv")
+raw_2014 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2014.csv")
+raw_2013 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2013.csv")
+raw_2012 <- read.csv("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\2012.csv")
+
+#creez subseturi din raw
+meteo_2021 <- raw_2021[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+meteo_2020 <- raw_2020[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+meteo_2019 <- raw_2019[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+meteo_2018 <- raw_2018[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+meteo_2017 <- raw_2017[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+meteo_2016 <- raw_2016[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+meteo_2015 <- raw_2015[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+meteo_2014 <- raw_2014[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+meteo_2013 <- raw_2013[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+meteo_2012 <- raw_2012[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+
+#incepe formatarea datei
+format(Sys.Date(), "%a %b %d") 
+data_strp <- strptime(meteo_2021$YEARMODA, format = '%Y-%m-%d')
+meteo_2021$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+sum(is.na(meteo_2021$YEARMODA))
+
+data_strp <- strptime(meteo_2020$YEARMODA, format = '%Y-%m-%d')
+meteo_2020$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+
+data_strp <- strptime(meteo_2019$YEARMODA, format = '%Y-%m-%d')
+meteo_2019$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+
+data_strp <- strptime(meteo_2018$YEARMODA, format = '%Y-%m-%d')
+meteo_2018$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+
+data_strp <- strptime(meteo_2017$YEARMODA, format = '%Y-%m-%d')
+meteo_2017$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+
+data_strp <- strptime(meteo_2016$YEARMODA, format = '%Y-%m-%d')
+meteo_2016$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+
+data_strp <- strptime(meteo_2015$YEARMODA, format = '%Y-%m-%d')
+meteo_2015$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+
+data_strp <- strptime(meteo_2014$YEARMODA, format = '%Y-%m-%d')
+meteo_2014$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+
+data_strp <- strptime(meteo_2013$YEARMODA, format = '%Y-%m-%d')
+meteo_2013$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+
+data_strp <- strptime(meteo_2012$YEARMODA, format = '%Y-%m-%d')
+meteo_2012$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+
+
+# temperaturi medii din subset
+avg_2021 <- aggregate(meteo_2021$TEMP, list(format(meteo_2021$MONTH), meteo_2021$STNID), mean)
+colnames(avg_2021) <- c("Month", "StationID", "Temp")
+head(avg_2021)
+tail(avg_2021)
+
+
+getwd()
+str(test_2013)
+head(test_2013)
+summary(comparedf(raw_2012, raw_2013, raw_2014, raw_2015, raw_2016, raw_2017,
+                raw_2018, raw_2019, raw_2020, raw_2021, by = "STNID"))
+summary(comparedf(test_2012, test_2013, test_2014, test_2015, test_2016, test_2017,
+                test_2018, test_2019, test_2020, test_2021, by = "TEMP"))
+meteo_2012 <- test_2012[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                            "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+head(meteo_2012)
+names(meteo_2012)
+format(Sys.Date(), "%a %b %d") #incepe formatarea datelor
+data_strp <- strptime(meteo_2012$YEARMODA, format = '%Y-%m-%d')
+meteo_2012$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+sum(is.na(meteo_2012$YEARMODA))
+
+str(test_2012)
+str(test_2014)
+#2012
+avg_2012 <- aggregate(meteo_2012$TEMP, list(format(meteo_2012$MONTH), meteo_2012$STNID), mean)
+colnames(avg_2012) <- c("Month", "StationID", "Temp")
+head(avg_2012)
+tail(avg_2012)
+unique(test_2014$STNID)
+
+#df cu coordonatele statiilor meteo
+Station_coord <- cbind(meteo_2012$STNID, meteo_2012$LATITUDE, meteo_2012$LONGITUDE)
+colnames(Station_coord) <- c("StationID", "Lat", "Long")
+head(Station_coord)
+joined_2012 <- left_join(avg_2012, Station_coord, by = "StationID")
+merge_2012 <- merge(avg_2012, Station_coord)
+head(merge_2012)
+#2013 - doar 9 statii? wtf
+
+sum(is.na(meteo_2013$YEARMODA))
+avg_2013 <-aggregate(meteo_2013$TEMP, list(format(meteo_2013$MONTH), meteo_2013$STNID), mean)
+colnames(avg_2013) <- c("Month", "StationID", "Temp")
+head(avg_2013)
+tail(avg_2013)
+#2014
+
+sum(is.na(meteo_2014$YEARMODA))
+avg_2014 <-aggregate(meteo_2014$TEMP, list(format(meteo_2014$MONTH), meteo_2014$STNID), mean)
+colnames(avg_2014) <- c("Month", "StationID", "Temp")
+head(avg_2014)
+tail(avg_2014)
+
+#2015
+
+sum(is.na(meteo_2015$YEARMODA))
+avg_2015 <-aggregate(meteo_2015$TEMP, list(format(meteo_2015$MONTH), meteo_2015$STNID), mean)
+colnames(avg_2015) <- c("Month", "StationID", "Temp15")
+head(avg_2015)
+tail(avg_2015)
+
+#2016
+
+sum(is.na(meteo_2016$YEARMODA))
+avg_2016 <-aggregate(meteo_2016$TEMP, list(format(meteo_2016$MONTH), meteo_2016$STNID), mean)
+colnames(avg_2016) <- c("Month", "StationID", "Temp16")
+head(avg_2016)
+tail(avg_2016)
+
+ #2017
+
+sum(is.na(meteo_2017$YEARMODA))
+avg_2017 <-aggregate(meteo_2017$TEMP, list(format(meteo_2017$MONTH), meteo_2017$STNID), mean)
+colnames(avg_2017) <- c("Month", "StationID", "Temp17")
+head(avg_2017)
+tail(avg_2017)
+
+
+#2018
+
+sum(is.na(meteo_2018$YEARMODA))
+avg_2018 <-aggregate(meteo_2018$TEMP, list(format(meteo_2018$MONTH), meteo_2018$STNID), mean)
+colnames(avg_2018) <- c("Month", "StationID", "Temp18")
+head(avg_2018)
+tail(avg_2018)
+
+
+#2019
+
+
+sum(is.na(meteo_2019$YEARMODA))
+avg_2019 <-aggregate(meteo_2019$TEMP, list(format(meteo_2019$MONTH), meteo_2019$STNID), mean)
+colnames(avg_2019) <- c("Month", "StationID", "Temp19")
+head(avg_2019)
+tail(avg_2019)
+
+#2020
+
+
+sum(is.na(meteo_2020$YEARMODA))
+avg_2020 <-aggregate(meteo_2020$TEMP, list(format(meteo_2020$MONTH), meteo_2020$STNID), mean)
+colnames(avg_2020) <- c("Month", "StationID", "Temp20")
+#Y <- 2020
+#avg_2020$Y <- Y
+head(avg_2020)
+tail(avg_2020)
+
+#2021
+
+
+sum(is.na(meteo_2021$YEARMODA))
+avg_2021 <-aggregate(meteo_2021$TEMP, list(format(meteo_2021$MONTH), meteo_2021$STNID), mean)
+colnames(avg_2021) <- c("Month", "StationID", "Temp21")
+#Y <- 2021
+#avg_2021$Y <- Y
+#avg_2021$Y_M <- paste(avg_2021$Month, avg_2021$Y)
+str(avg_2021)
+head(avg_2021)
+tail(avg_2021)
+
+
+#multi-annual mean
+
+avg_15_21 <- data.frame(avg_2015$StationID, avg_2015$Month, avg_2015$Temp15, avg_2016$Temp16, avg_2017$Temp17, avg_2018$Temp18,
+                        avg_2019$Temp19, avg_2020$Temp20, avg_2021$Temp21)
+head(avg_15_21)
+tail(avg_15_21)
+averageT <- data.frame(ID=avg_15_21[,1], Month = avg_15_21[,2],Mean = rowMeans(avg_15_21[,3:9]))
+avg_summ <- averageT
+avg_summ <- aggregate(averageT$Mean, list(averageT$ID), FUN = mean)
+head(averageT)
+tail(averageT)
+head(avg_summ)
+#export
+write.csv(averageT, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\AverageT\\AverageT.csv", row.names = FALSE)
+write.csv(Station_coord, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\AverageT\\Coord.csv", row.names = FALSE)
+write.csv(avg_summ, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\AverageT\\Avg_summ.csv", row.names = FALSE)
+
+bind_rows(avg_2015, avg_2016,avg_2017, avg_2018, avg_2019, avg_2020, avg_2021) %>%
+  group_by(StationID, Month, Y_M) %>%
+  summarise_each(funs(mean))
+ 
+
+
+
+
+
+#TMIN
+#2021
+sum(is.na(meteo_2021$MIN))
+sum(is.na(meteo_2020$MIN))
+sum(is.na(meteo_2019$MIN))
+sum(is.na(meteo_2018$MIN))
+sum(is.na(meteo_2017$MIN))
+sum(is.na(meteo_2016$MIN))
+sum(is.na(meteo_2015$MIN))
+
+min_2021 <-aggregate(meteo_2021$MIN, list(format(meteo_2021$MONTH), meteo_2021$STNID), mean, na.rm = TRUE, na.action = NULL)
+colnames(min_2021) <- c("Month", "StationID", "Min21")
+head(min_2021)
+sum(is.na(meteo_2021$MIN))
+
+print(meteo_2021$MIN)
+
+#2020
+
+min_2020 <-aggregate(meteo_2020$MIN, list(format(meteo_2020$MONTH), meteo_2020$STNID), mean, na.rm = TRUE, na.action = NULL)
+colnames(min_2020) <- c("Month", "StationID", "Min20")
+
+#2019
+min_2019 <-aggregate(meteo_2019$MIN, list(format(meteo_2019$MONTH), meteo_2019$STNID), mean)
+colnames(min_2019) <- c("Month", "StationID", "Min19")
+
+#2018
+
+min_2018 <-aggregate(meteo_2018$MIN, list(format(meteo_2018$MONTH), meteo_2018$STNID), mean)
+colnames(min_2018) <- c("Month", "StationID", "Min18")
+
+#2017
+
+min_2017 <-aggregate(meteo_2017$MIN, list(format(meteo_2017$MONTH), meteo_2017$STNID), mean)
+colnames(min_2017) <- c("Month", "StationID", "Min17")
+
+#2016
+
+min_2016 <-aggregate(meteo_2016$MIN, list(format(meteo_2016$MONTH), meteo_2016$STNID), mean)
+colnames(min_2016) <- c("Month", "StationID", "Min16")
+
+#2015
+
+min_2015 <-aggregate(meteo_2015$MIN, list(format(meteo_2015$MONTH), meteo_2015$STNID), mean)
+colnames(min_2015) <- c("Month", "StationID", "Min15")
+
+
+
+
+min_15_21 <- data.frame(min_2015$StationID, min_2015$Month, min_2015$Min15, min_2016$Min16, min_2017$Min17, min_2018$Min18, min_2019$Min19, 
+                        min_2020$Min20, min_2021$Min21)
+head(min_15_21)
+tail(min_15_21)
+minT <- data.frame(ID=min_15_21[,1], Month = min_15_21[,2],Mean = rowMeans(min_15_21[,3:9]))
+head(minT)
+tail(minT)
+sum(is.na(minT))
+min_summ <- minT
+min_summ <- aggregate(minT$Mean, list(minT$ID), FUN = mean)
+colnames(min_summ) <- c("ID", "Min")
+head(min_summ)
+#export
+write.csv(minT, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\AverageT\\MinT.csv", row.names = FALSE)
+write.csv(min_summ, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\AverageT\\Min_summarised.csv", row.names = FALSE)
+
+
+
+#TMAX
+
+
+#2021
+
+max_2021 <-aggregate(meteo_2021$MAX, list(format(meteo_2021$MONTH), meteo_2021$STNID), mean, na.rm = TRUE, na.action = NULL)
+colnames(max_2021) <- c("Month", "StationID", "Max21")
+
+#2020
+
+max_2020 <-aggregate(meteo_2020$MAX, list(format(meteo_2020$MONTH), meteo_2020$STNID), mean, na.rm = TRUE, na.action = NULL)
+colnames(max_2020) <- c("Month", "StationID", "Max20")
+
+#2019
+max_2019 <-aggregate(meteo_2019$MAX, list(format(meteo_2019$MONTH), meteo_2019$STNID), mean)
+colnames(max_2019) <- c("Month", "StationID", "Max19")
+
+#2018
+
+max_2018 <-aggregate(meteo_2018$MAX, list(format(meteo_2018$MONTH), meteo_2018$STNID), mean)
+colnames(max_2018) <- c("Month", "StationID", "Max18")
+
+#2017
+
+max_2017 <-aggregate(meteo_2017$MAX, list(format(meteo_2017$MONTH), meteo_2017$STNID), mean)
+colnames(max_2017) <- c("Month", "StationID", "Max17")
+
+#2016
+
+max_2016 <-aggregate(meteo_2016$MAX, list(format(meteo_2016$MONTH), meteo_2016$STNID), mean)
+colnames(max_2016) <- c("Month", "StationID", "Max16")
+
+#2015
+
+max_2015 <-aggregate(meteo_2015$MAX, list(format(meteo_2015$MONTH), meteo_2015$STNID), mean)
+colnames(max_2015) <- c("Month", "StationID", "Max15")
+
+
+
+
+max_15_21 <- data.frame(max_2015$StationID, max_2015$Month, max_2015$Max15, max_2016$Max16, max_2017$Max17, max_2018$Max18, max_2019$Max19, 
+                        max_2020$Max20, max_2021$Max21)
+head(max_15_21)
+tail(max_15_21)
+maxT <- data.frame(ID=max_15_21[,1], Month = max_15_21[,2],Mean = rowMeans(max_15_21[,3:9]))
+head(maxT)
+tail(maxT)
+sum(is.na(max_15_21))
+max_summ <- maxT
+max_summ <- aggregate(maxT$Mean, list(maxT$ID), FUN = mean)
+colnames(max_summ) <- c("ID","Max")
+
+#export
+write.csv(maxT, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\AverageT\\MaxT.csv", row.names = FALSE)
+write.csv(max_summ, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\AverageT\\Max_summarised.csv", row.names = FALSE)
+
+
+
+#Mean Diurnal Range (AVG month (max-min))
+all_MDR <- data.frame(ID=averageT[,1],Month = averageT[,2], MDR = maxT[,3] - minT[,3])
+all_MDR <- aggregate(all_MDR$MDR, list(all_MDR$ID), FUN = mean)
+head(all_MDR) 
+tail(all_MDR)
+
+MDR <- data.frame(ID = avg_summ[,1], MDR = avg_summ[,2] * (max_summ [,2] - min_summ[,2])) ###ceva nu e bine
+head(MDR) ### trebuie verificata formula
+tail(MDR)
+write.csv(all_MDR, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\AverageT\\MDR2.csv", row.names = FALSE)
+#cu fruclimadapt
+
+all_max_min
+
+########
+
+sum(is.na(meteo_2021$YEARMODA))
+avg_2021 <-aggregate(meteo_2021$TEMP, list(format(meteo_2021$MONTH), meteo_2021$STNID), mean)
+colnames(avg_2021) <- c("Month", "StationID", "Temp21")
+
+
+#
+for(stations_2 in meteo_2012){
+  avg_2012 <- wth.param(meteo_2012, llim = 0, method = "poisson", year.col = "YEAR", 
+                        month.col = "MONTH", day.col = "DAY", prcp.col = "PRCP", 
+                        tmin.col = "MIN", tmax.col = "MAX")
+}
+
+avg_2012 <- wth.param(meteo_2012, llim = 0, method = "poisson", year.col = "YEAR", 
+          month.col = "MONTH", day.col = "DAY", prcp.col = "PRCP", 
+          tmin.col = "MIN", tmax.col = "MAX")
+  # Merge pt df statii intr-un singur df
+  class(test)
+head(test)
+statii_df <- unique(test$LATITUDE, test$LONGITUDE, test$ELEVATION, test$STINF, test$NAME)
+temperature_df <- test[,c("TEMP")]
+head(temperature_df)
+homogen('test', 2021, expl = TRUE)
+#file.edit("~/.Rprofile")
+#ncdc_stations(extent = c(45.45, 25.45, 45.46, 25.46), token = "BppmyjCtMKpBiTiOzwaEToauUjGlWeta")
+#ncdc(datasetid = 'ANNUAL', stationid = 'ROM00015280', startdate = '2013-01-01', enddate = '2022-01-01', token = "BppmyjCtMKpBiTiOzwaEToauUjGlWeta")
+#ncdc_datasets(stationid = 'ROM00015280',  token = "BppmyjCtMKpBiTiOzwaEToauUjGlWeta")
+
+#verificare si clean up date
+
+
+#Import Raster
+
+#procesare raster (agregare 120 150  si 180)
