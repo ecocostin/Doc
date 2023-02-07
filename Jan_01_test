@@ -62,6 +62,7 @@ plot(v.TEMP <- variogram(TEMP ~ 1, data = Jan_01), pl = T)
 #estimating variogram form and parameters, selecting nugget ~ 0,5 ; sill ~ 13 ; range ~ 140
 m.TEMP <- vgm(psill = 13, nugget = 1, sill = 140, model = "Sph") #using spherical
 
+#error using packet 1?
 plot(v.TEMP, pl=T, model=m.TEMP)
 
 (fit_var = fit.variogram(object = v.TEMP, model = m.TEMP))
