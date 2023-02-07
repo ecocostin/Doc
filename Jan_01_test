@@ -1,0 +1,85 @@
+library(sp)
+library(gstat)
+library(readr)
+require(spdep)
+library(dplyr)
+library(sf)
+require(sp)
+require(rgdal)
+require(raster)
+
+
+raw_2021 <- read.csv("2021.csv")
+
+meteo_2021 <- raw_2021[ ,c("STNID","NAME","LATITUDE","LONGITUDE", "ELEVATION","YEARMODA", 
+                           "YEAR", "MONTH", "DAY","TEMP","MAX","MIN","PRCP")]
+#date formating
+format(Sys.Date(), "%a %b %d") 
+data_strp <- strptime(meteo_2021$YEARMODA, format = '%Y-%m-%d')
+meteo_2021$YEARMODA <- as.Date(data_strp, format = "%Y-%m-%d")
+sum(is.na(meteo_2021$YEARMODA))
+
+
+meteo_2021 %>% distinct(YEARMODA, .keep_all = FALSE)
+# creating a new dataframe and ordering it by YEARMODA
+ord_2021 <- meteo_2021
+
+#arranging df by date
+ord_2021 <- ord_2021 %>% arrange(YEARMODA)
+
+#changing long lat to x y
+colnames(ord_2021) [3]<- "y"
+colnames(ord_2021)[4] <- "x"
+str(ord_2021)
+
+#extracting Jan 01 data
+Jan_01 <- ord_2021[1:57, ]
+str(Jan_01)
+#spatial points
+sp::coordinates(Jan_01) <- ~x + y
+DEM <- raster(paste0("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raster\\aoi_wgs_.tif"))
+DEM
+res(DEM)
+plot(DEM)
+#creating 120x120 raster
+DEM120 <- aggregate(DEM, 4)
+res(DEM120)
+plot(DEM120)
+str(DEM120)
+#converting raster to spatial grid  
+DEM_p <-  as(DEM, 'SpatialGridDataFrame')
+DEM120_p <- as(DEM120, 'SpatialGridDataFrame')
+str(DEM120_p)
+#defining projection
+crs(Jan_01) <- CRS("+proj=longlat +datum=WGS84")
+summary(Jan_01)
+#computing temp variogram cloud
+v.TEMP.c <- variogram(object = TEMP ~ 1, data=Jan_01, cloud = T)
+plot(v.TEMP.c)
+write.csv(ord_2021, "D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raw\\Ord_2021.csv")
+# ploting experimental variogram 
+plot(v.TEMP <- variogram(TEMP ~ 1, data = Jan_01), pl = T)
+#estimating variogram form and parameters, selecting nugget ~ 0,5 ; sill ~ 13 ; range ~ 140
+m.TEMP <- vgm(psill = 13, nugget = 1, sill = 140, model = "Sph") #using spherical
+
+plot(v.TEMP, pl=T, model=m.TEMP)
+
+(fit_var = fit.variogram(object = v.TEMP, model = m.TEMP))
+
+plot(v.TEMP, pl =T, model = fit_var)
+
+k.o <- krige(TEMP ~ 1, Jan_01, newdata = DEM120_p, model=fit_var)
+summary(k.o)
+#call ck_plotfns.R
+source("ck_plotfns.R")
+plot.kresults(k.o, "var1", Jan_01, "TEMP")
+require(lattice)
+###scatter plotting the temp data (response var) with the elevation (covariable) to see any relationships 
+xyplot(TEMP ~ ELEVATION, data=Jan_01@data, pch=20, cex=1.2,
+       col="blue", ylab="Temp", xlab="Elev")
+with(Jan_01@data, cor(ELEVATION, TEMP))
+
+sum(is.na(Jan_01$ELEVATION))
+
+with(Jan_01@data, cor(ELEVATION, TEMP, use = "complete"))
+###showing a negative feature-space relation between target and covariable (90% explanation)
