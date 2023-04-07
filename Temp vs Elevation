@@ -1,0 +1,46 @@
+
+#corelating DEM to temp
+# Load required libraries
+library(ggplot2)     # For plotting
+library(dplyr)       # For data manipulation
+library(lubridate)   # For date-time manipulation
+library(raster)      # For working with DEMs
+
+
+# Convert date column to date format
+#weather_data$date <- as.Date(weather_data$date, "%Y-%m-%d")
+
+
+
+dem <- raster("D:\\Costin\\Personal\\Doc\\Lucru\\Meteo\\AOI\\Raster\\aoi_wgs_.tif")
+
+# Extract elevation values for each weather station
+station_elevations <- extract(dem, as.matrix(weather_data2021[, c("LONGITUDE", "LATITUDE")]))
+
+# Add elevation column to weather data
+weather_data2021$elevation <- station_elevations
+
+# Check data structure and summary statistics
+str(weather_data2021)
+summary(weather_data2021)
+
+# Group data by station and calculate average temperature and elevation for each day
+daily_temps_elev <- weather_data2021 %>% 
+  group_by(STNID, YEARMODA) %>% 
+  summarise(avg_temp = mean(TEMP, na.rm = TRUE),
+            avg_elev = mean(elevation, na.rm = TRUE))
+
+# Create a scatter plot of average temperature vs. elevation for each station
+ggplot(data = daily_temps_elev, aes(x = avg_elev, y = avg_temp, color = STNID)) +
+  geom_point() +
+  labs(title = "Effect of Elevation on Temperature", 
+       x = "Elevation (m)", y = "Temperature (°C)") +
+  theme_minimal()
+
+model <- lm(TEMP~elevation, data = weather_data2021, na.action = na.exclude)
+summary(model)
+# Plot the data
+plot(weather_data2021$elevation, weather_data2021$TEMP, xlab = "Elevation", ylab = "Temperature", 
+     main = "Temperature vs. Elevation")
+abline(model, col = "red")
+
